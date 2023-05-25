@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+
+#Point 3
+def main():
+    a, b = 1, 1
+    target = 48
+    for n in range(3, 49):
+        fib = a + b
+        print(f"f(n) = {fib}")
+        a = b
+        b = fib
+
+if __name__=="__main__":
+    main()

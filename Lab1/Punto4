@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+import numpy as np
+
+v = []
+
+for i in range(0,16):
+    v.append(i)
+
+mydict = {
+    "name": "neuralnet",
+    "loss": 0.12,
+    "weights": [10,25,5]
+}
+
+print(f"mydict = {mydict}")
+
+mylist = [2,6,3,8,9,11,-5]
+
+sum = 0
+for i in mylist:
+    sum += i
+
+mean=sum/len(mylist)
+print(f"mean = {mean}")
+
+l = [2**n for n in range(10)]
+print(f"l = {l}")
