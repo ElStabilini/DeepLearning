@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+import timeit
+import numpy as np
+from numpy import random as rn
+import matplotlib 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
+import numba
+
+x, y = np.loadtxt("data4.dat", usecols=(0,1), delimiter=" ", unpack='true')
+
+plt.figure(figsize=(6,6))
+plt.scatter(x,y, color="red")
+plt.title("Charged particles")
+
+ax = plt.gca()
+ax.set_xlabel("x-coordinate")
+ax.set_ylabel("y-coordinate")
+
+plt.savefig("output.png")
+plt.show()

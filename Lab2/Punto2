@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+import timeit
+import numpy as np
+from numpy import random as rn
+import numba
+
+N = 3
+v = rn.random(N)
+A = rn.random((N,N))
+
+def dotprod(A,B):
+    rig = np.asarray(A.shape)[1]
+    col = np.asarray(B.shape)[0]
+
+    if rig != col :
+        raise ValueError("Cannot multiply these matrix")
+    else:
+        N = rig
+        rig = np.asarray(A.shape)[0]
+        col = np.asarray(B.shape)[1]
+        prod = np.zeros((rig,col))
+        
+        for i in range(rig):
+            for j in range(col):
+                sum = 0
+                for k in range(N):
+                    sum += A[i][k]*B[k][j]
+                prod[i][j] = sum           
+    
+    return prod
+
+@numba.jit()
+
+def vecdotprod(A,v):
+    rig = np.asarray(A.shape)[1]
+    col = len(v)
+
+    if rig != col :
+        raise ValueError("Cannot multiply these matrix")
+    else: 
+        N = rig
+        rig = np.asarray(A.shape)[0]
+        prod = np.zeros((rig,1))
+
+        for i in range(rig):
+                sum = 0
+                for k in range(N):
+                    sum += A[i][k]*v[k]
+                prod[i][0] = sum
+
+    return prod
+
+
+if __name__ == "__main__":
+    print((A.shape))
+    start = timeit.timeit()
+    prod = vecdotprod(A,v)
+    end = timeit.timeit()
+    print(prod)
+    print(f"time: {end-start}")

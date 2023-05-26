@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+import timeit
+import numpy as np
+from numpy import random as rn
+import matplotlib 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
+import numba
+
+x = np.linspace(0,5,500)
+y = [math.exp(-xi) * math.cos(2*math.pi*xi) for xi in x]
+
+plt.figure(figsize=(10,6))
+ax = plt.gca()
+
+plt.plot(x,y, marker='o', color="mediumaquamarine")
+plt.title("First plot")
+ax.set_xlabel("x")
+ax.set_ylabel("f(x)")
+plt.show()

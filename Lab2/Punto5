@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+import timeit
+import csv
+import numpy as np
+from numpy import random as rn
+import matplotlib 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
+import numba
+
+def func(x):
+    return -math.sin(x*x)/x + 0.01*x*x
+
+xarray = np.linspace(-3,3, num=100)
+yarray = [func(x) for x in xarray]
+
+rows = [[xarray[i], yarray[i]] for i in range(len(xarray))]
+
+with open('data.csv', 'w') as f:
+    writer = csv.writer(f)
+    writer.writerows(rows)
+
+plt.figure(figsize=(10,6))
+plt.scatter(xarray, yarray, color="mediumaquamarine", label=r'$\frac{\sin(x^2)}{x} + 0.01x^2$')
+plt.title("Function plot")
+plt.legend(f"sin(x^2)/x + 0.01 x^2") #capire come manipolare la legenda
+
+ax = plt.gca()
+ax.set_xlim([-3.0, 3.0])
+ax.set_xlabel("x")
+ax.set_ylabel("f(x)")
+
+plt.savefig("output5.png")
+plt.show()

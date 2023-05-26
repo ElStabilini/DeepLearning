@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import math
+import warnings
+import string
+import pytest
+import scipy
+from scipy.optimize import curve_fit
+import scipy.integrate as integrate
+import seaborn as sns
+
+import json
+import yaml
+import pathlib
+import pandas as pd
+
+#define variables
+url = 'http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data'
+column_names = ['MPG', 'Cylinders', 'Displacement', 'Horsepower', 'Weight', 'Acceleration', 'Model Year', 'Origin']
+
+#import dataset
+raw_dataset = pd.read_csv(url, names=column_names, na_values='?', comment='\t', sep=' ', skipinitialspace=True)
+
+#delate nan
+dframe = raw_dataset.dropna()
+
+#Punto2
+for name in column_names:
+    print(f"{name} mean = {dframe[name].mean()}")
+
+#Punto3
+dframe3 = dframe.drop(dframe[dframe.Cylinders !=3].index)
+
+for name in column_names:
+    print(f"{name} mean = {dframe3[name].mean()}")
