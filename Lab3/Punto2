@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+import tensorflow as tf
+from tensorflow import keras
+
+"""
+    POINT 1: Riscrivere il modello precedente con Keras sequential  
+"""
+
+#fix random seed (devo farlo sempre quando uso tensorflow)
+tf.random.set_seed(0)
+
+#definisco le dimensioni della rete (architettura)
+n_input = 1
+n_hidden_1 = 5
+n_hidden_2 = 2
+n_output = 1
+
+model = tf.keras.Sequential()
+model.add(tf.keras.layers.Dense(n_hidden_1,activation="sigmoid", input_dim=1))
+model.add(tf.keras.layers.Dense(n_hidden_2,activation="sigmoid"))
+model.add(tf.keras.layers.Dense(n_output, activation='linear'))
+
+"""
+   POINT 2: Srampare il riassunto del modello a schermo
+"""
+tensor = np.linspace(-1, 1, 10, dtype=np.float32).reshape(-1, 1)
+y1 = model(tensor)
+model.summary()
+
+
+
+"""
+    POINT 3: controllare che le predizioni dei due modelli siano le medesime
+"""
+
+weights = {
+    "h1": tf.Variable(tf.random.normal([n_input, n_hidden_1])),
+    "h2": tf.Variable(tf.random.normal([n_hidden_1, n_hidden_2])),
+    "output": tf.Variable(tf.random.normal([n_hidden_2,n_output])),
+}
+
+biases = {
+    "b1":tf.Variable(tf.random.normal([n_hidden_1])),
+    "b2":tf.Variable(tf.random.normal([n_hidden_2])),
+    "bout":tf.Variable(tf.random.normal([n_output])),
+}
+
+# assign parameters from previous model
+model.set_weights([weights["h1"], biases["b1"],
+                   weights["h2"], biases["b2"],
+                   weights["output"], biases["bout"]])
+y2 = model.predict(tensor)
+
+if not np.allclose(y1, y2):
+    raise ValueError("results do not match")
+
+"""
+    POINT 4: Stampare i pesi del nuovo modello
+"""

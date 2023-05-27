@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+import tensorflow as tf
+
+"""
+    POINT 1:
+    allocate random normal variables for weight and bias representaztion
+    of a multi-layer perceptron  
+"""
+
+#fix random seed (devo farlo sempre quando uso tensorflow)
+tf.random.set_seed(0)
+
+#definisco le dimensioni della rete (architettura)
+n_input = 1
+n_hidden_1 = 5
+n_hidden_2 = 2
+n_output = 1
+
+"""
+    Nota: due layer sono sempre collegati da una matrice di pesi di dimensioni
+    righe: numero di neuroni nel primo layer
+    colonne numero di neuroni nel secondo layer
+"""
+#creo un dizionario per allocare i pesi
+weights = {
+    "h1": tf.Variable(tf.random.normal([n_input, n_hidden_1])),
+    "h2": tf.Variable(tf.random.normal([n_hidden_1, n_hidden_2])),
+    "output": tf.Variable(tf.random.normal([n_hidden_2,n_output])),
+}
+
+"""
+    Nota: i bias sono un vettore, sono una cosa che aggiungo una volta che il dato è entrato nel nodo
+"""
+#creo un dizionario per allorcare i bias 
+biases = {
+    "b1":tf.Variable(tf.random.normal([n_hidden_1])),
+    "b2":tf.Variable(tf.random.normal([n_hidden_2])),
+    "bout":tf.Variable(tf.random.normal([n_output])),
+}
+
+@tf.function
+def MLP(tensor):
+    #quello che devo fare è definire l'output di ciascun layer
+    #quindi devo incapsulare le diverse operazioni nell'operazione più esterna
+    layer_1 = tf.sigmoid(tf.add(tf.matmul(tensor, weights["h1"]), biases["b1"])) #l'output è un vettore
+    layer_2 = tf.sigmoid(tf.add(tf.matmul(layer_1, weights["h2"]), biases["b2"]))
+    output = tf.add(tf.matmul(layer_2,weights["output"]), biases["bout"])
+    return output
+
+"""    
+    POINT 3:
+    test the model for 10 values in x linearly spaced [-1,1]
+"""
+def main():
+    # print predictions
+    tensor = np.linspace(-1, 1, 10, dtype=np.float32)
+    tensor = tensor.reshape(-1, 1)
+    print(MLP(tensor))
+
+if __name__ == "__main__":
+    main()

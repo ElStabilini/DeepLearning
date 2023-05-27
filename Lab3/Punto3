@@ -1,0 +1,160 @@
+#!/usr/bin/env python
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+import tensorflow as tf
+from tensorflow import keras
+
+""" DATA GENERATION """
+
+def f(x):
+    return 3*x+2
+
+def generate_data(N):
+    x = tf.linspace(-2,2,N)
+    x = tf.cast(x, tf.float32)
+    y = [np.random.normal(3*x +2, 1) for x in x]
+    return x, y
+
+"""
+    LINEAR FIT
+    Devo creare un mio modello personale che faccia una serie di operazioni:
+    per creare il mio modello devo costruire una classe che erediti da tf.module
+    perchè è come se io volessi creare un nuovo modello di keras
+"""
+
+class MyModel(tf.Module):
+
+    #sicuramente devo definire una funzione di inizializzazione
+    #per convenzione per prima cosa il modello inizializza se stess
+    # *args : non keywords arguments
+    # **kwags : keywords arguments, mi inserisce tutti questi elementi in un dizionario
+    def __init__(self,**kwargs): 
+        super().__init__(**kwargs) #spacchetta tutte le keywords
+        self.w = tf.Variable(0.5)
+        self.b = tf.Variable(0.0)
+    
+    #devo sicuramente un modo per chiamare la funzione ed utilizzarla
+    def __call__(self, x):
+        return self.w*x + self.b
+
+
+
+#definisco la funzione costo, una MSE
+def MyLoss(target_y, predicted_y):
+    return tf.reduce_mean(tf.square(target_y - predicted_y))
+
+
+"""
+    TRAINING LOOP
+    Definire una funzione di training che calsola il gradiente della loss
+    Deve fare un SGD full-batch
+
+    NOTA: quello che deve fare la funzione di training è aggiornare i pesi e i bias
+    in modo da rendere il modello il più coerente possibile con i dati
+    quindi in realtà non deve ritornarmi nessun valore
+"""
+def MyTrain(model, x, y, learning_rate):
+    
+    with tf.GradientTape() as tape:
+        current_loss = MyLoss(y,model(x))
+    
+    #utilizzo GradientTape per clacolare il gradiente della loss rispetto a b e w
+    dw, db = tape.gradient(current_loss, [model.w, model.b])
+
+    #aggiorno i pesi e i bias con la funzione di aggiornamento standard 
+    # che abbiamo visto a lezione
+    #NB: bisogna usare proprio assign_sub, non c'è un altro modo perchè altrimenti è un casino
+
+    model.w.assign_sub(learning_rate * dw)
+    model.b.assign_sub(learning_rate * db)
+
+
+"""
+    definisco una funzione training loop che deve allenare la mia 
+    rete neurale per un numero fissato di epoche
+"""
+
+def report(model, loss):
+    return f"W = {model.w.numpy():1.2f}, b = {model.b.numpy():1.2f}, loss={loss:2.5f}"
+
+def training_loop(model, x, y, epochs, learning_rate):
+
+    weights = []
+    biases = []
+
+    for epoch in epochs:
+        MyTrain(model,x,y, learning_rate),
+        weights.append(model.w.numpy())
+        biases.append(model.b.numpy())
+        
+        #aggiungo anche il calcolo della loss per poter rimanere aggiornata da schermo
+        current_loss = MyLoss(y, model(x))
+        
+        #questa parte fa parte del post-fit che è stato richiesto
+        print(f"Epoch {epoch:2d}:")
+        print("    ", report(model, current_loss))
+
+    return weights, biases
+
+
+
+""" KERAS """
+class MyKerasModel(tf.keras.Model):
+    
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        self.w = tf.Variable(5.0)
+        self.b = tf.Variable(0.0)
+
+    def __call__(self, x, training=False):
+        return self.w*x + self.b
+
+
+""" MAIN """
+
+def main():
+
+    N = 200
+    x, y = generate_data(N)
+
+    #plot dei dati e modello
+    plt.figure()
+    plt.plot(x, f(x), label="True function")
+    plt.scatter(x, y, color='b', label="Samples")
+    plt.title("TensorFlow")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.legend()
+    plt.show()
+
+
+    #info pre-training
+    model = MyModel()
+    y_pred = model(x)
+    y_target = f(x)
+    print("Untrained model loss: %1.6f" % MyLoss(y_target, y_pred).numpy())
+
+    #info post-training
+    epochs = range(10)
+    learning_rate = 0.1
+    training_loop(model, x, y, epochs, learning_rate)
+    
+    # keras model
+    keras_model = MyKerasModel()
+    keras_model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.1),
+                        loss=tf.keras.losses.mean_squared_error)
+    keras_model.fit(np.array(x), np.array(y), epochs=10, batch_size=len(x))
+    
+    plt.figure()
+    plt.scatter(x, y, label="Data")
+    plt.plot(x, f(x), "orange", label="Ground truth")
+    plt.plot(x, y_pred, "green", label="Untrained predictions")
+    plt.plot(x, keras_model(x), "red", label="Trained predictions")
+    plt.title("Keras Model")
+    plt.legend()
+    plt.show()
+
+if __name__ == "__main__":
+    main()
